@@ -78,6 +78,10 @@ function saveData(maxAge, expireKey, indexKey) {
   localStorage.setItem(indexKey, JSON.stringify(INDEXS));
 }
 
+function replaceMarkdownKeyword(markdownContent) {
+  return markdownContent ? markdownContent.replace(/\\([.*#])/g, '$1') : markdownContent;
+}
+
 export function genIndex(path, content = '', router, depth) {
   const tokens = window.marked.lexer(content);
   const slugify = window.Docsify.slugify;
@@ -96,12 +100,14 @@ export function genIndex(path, content = '', router, depth) {
       }
 
       if (str) {
-        title = str
+        title = replaceMarkdownKeyword(
+          str
           .replace(/<!-- {docsify-ignore} -->/, '')
           .replace(/{docsify-ignore}/, '')
           .replace(/<!-- {docsify-ignore-all} -->/, '')
           .replace(/{docsify-ignore-all}/, '')
-          .trim();
+          .trim()
+        );
       }
 
       index[slug] = { slug, title: title, body: '' };
@@ -125,6 +131,7 @@ export function genIndex(path, content = '', router, depth) {
           ? index[slug].body + token.text
           : token.text;
       }
+      index[slug].body = replaceMarkdownKeyword(index[slug].body)
     }
   });
   slugify.clear();
